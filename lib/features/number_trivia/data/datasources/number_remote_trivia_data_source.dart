@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:clean_arch/core/error/exceptions.dart';
 import 'package:clean_arch/core/networking/number_trivia_web_service.dart';
 import 'package:clean_arch/features/number_trivia/data/models/number_trivia_model.dart';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
 abstract class NumberTriviaRemoteDataSource {
@@ -18,15 +19,29 @@ abstract class NumberTriviaRemoteDataSource {
 }
 
 class NumberTriviaRemoteDataSourceImpl implements NumberTriviaRemoteDataSource {
-  final http.Client client;
+  final Dio dio;
 
-  NumberTriviaRemoteDataSourceImpl({required this.client});
-
-  @override
-  Future<NumberTriviaModel> getConcreteNumberTrivia(int number) => NumberTriviaWebService().getTriviaFromUrl(number.toString());
+  NumberTriviaRemoteDataSourceImpl({required this.dio});
 
   @override
-  Future<NumberTriviaModel> getRandomNumberTrivia() => NumberTriviaWebService().getTriviaFromUrl('random');
+  Future<NumberTriviaModel> getConcreteNumberTrivia(int number) => getTriviaFromUrl(number.toString());
+
+  @override
+  Future<NumberTriviaModel> getRandomNumberTrivia() => getTriviaFromUrl('random');
+
+  Future<NumberTriviaModel> getTriviaFromUrl(String endPoint) async {
+    try {
+      Response response = await dio.get(endPoint);
+      if (response.statusCode == 200) {
+        return NumberTriviaModel.fromJson(json.decode(response.data));
+      } else {
+        throw ServerException();
+      }
+    } catch (e) {
+      print(e.toString());
+      return NumberTriviaModel(text:"",number: 0);
+    }
+  }
 
   // Future<NumberTriviaModel> _getTriviaFromUrl(String url) async {
   //   final response = await client.get(
