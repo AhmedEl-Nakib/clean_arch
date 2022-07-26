@@ -52,13 +52,15 @@ Future<void> init() async {
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => http.Client());
 
-  sl.registerLazySingleton(() => Dio(BaseOptions(
+  sl.registerLazySingleton(() => Dio(sl()));
+
+  sl.registerLazySingleton(() => BaseOptions(
       baseUrl: "http://numbersapi.com/",
       receiveDataWhenStatusError: true,
       connectTimeout: 20 * 1000, // 60 seconds,
       receiveTimeout: 20 * 1000,
       headers: {'Content-Type': 'application/json'}
-  )));
+  ));
 
 
   sl.registerLazySingleton(() => DataConnectionChecker());
